@@ -3,8 +3,8 @@ import { TrackerMap } from './components/TrackerMap';
 import { TrackerSidebar } from './components/TrackerSidebar';
 import { Tracker } from './data/gpsData';
 
-const BACKEND_WS = import.meta.env.VITE_BACKEND_WS || 'ws://localhost:3001';
-const BACKEND_HTTP = import.meta.env.VITE_BACKEND_HTTP || 'http://localhost:3001';
+const BACKEND_WS = import.meta.env.VITE_BACKEND_WS || 'wss://embedded-systems-project-60lg.onrender.com';
+const BACKEND_HTTP = import.meta.env.VITE_BACKEND_HTTP || 'https://embedded-systems-project-60lg.onrender.com';
 
 function App() {
   const [trackers, setTrackers] = useState<Tracker[]>([]);
