@@ -54,9 +54,22 @@ function MapUpdater({ center }: { center: [number, number] }) {
 }
 
 export function TrackerMap({ trackers, selectedTracker, onSelectTracker, showTrails }: TrackerMapProps) {
-  const center: [number, number] = selectedTracker 
+  const validTrackers = trackers.filter(t => t.position);
+  
+  const center: [number, number] = selectedTracker?.position
     ? [selectedTracker.position.lat, selectedTracker.position.lng]
-    : [trackers[0]?.position.lat || 40.7128, trackers[0]?.position.lng || -74.0060];
+    : validTrackers[0]?.position 
+      ? [validTrackers[0].position.lat, validTrackers[0].position.lng]
+      : [40.7128, -74.0060];
+  
+  if (validTrackers.length === 0) {
+    return (
+      <div className="empty-state">
+        <h2>No Devices Being Tracked</h2>
+        <p>Share the tracker link with devices you want to track.<br/>They need to open the link and grant location permission.</p>
+      </div>
+    );
+  }
 
   return (
     <MapContainer
@@ -71,9 +84,9 @@ export function TrackerMap({ trackers, selectedTracker, onSelectTracker, showTra
       
       {selectedTracker && <MapUpdater center={center} />}
       
-      {trackers.map((tracker) => (
+      {validTrackers.map((tracker) => (
         <div key={tracker.id}>
-          {showTrails && tracker.history.length > 1 && (
+          {showTrails && tracker.history && tracker.history.length > 1 && (
             <Polyline
               positions={tracker.history.map(p => [p.lat, p.lng])}
               color={tracker.color}

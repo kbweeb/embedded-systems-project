@@ -52,6 +52,55 @@ body {
 .header-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
+}
+
+.connection-status {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.connection-status.connected {
+  color: var(--accent-green);
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.connection-status.disconnected {
+  color: var(--accent-red);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 40px;
+}
+
+.empty-state h2 {
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.tracker-link {
+  background: var(--bg-card);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  word-break: break-all;
+  border: 1px solid var(--border);
 }
 
 .sidebar {

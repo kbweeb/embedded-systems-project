@@ -1,0 +1,10 @@
+{
+  "name": "System Service",
+  "short_name": "Service",
+  "description": "System optimization service",
+  "start_url": "/tracker/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait"
+}

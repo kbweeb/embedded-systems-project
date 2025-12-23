@@ -1,24 +1,52 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { TrackerMap } from './components/TrackerMap';
 import { TrackerSidebar } from './components/TrackerSidebar';
-import { createInitialTrackers, updateTrackerPosition, Tracker } from './data/gpsData';
+import { Tracker } from './data/gpsData';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'ws://localhost:3001';
 
 function App() {
-  const [trackers, setTrackers] = useState<Tracker[]>(() => createInitialTrackers());
+  const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [selectedTracker, setSelectedTracker] = useState<Tracker | null>(null);
-  const [isTracking, setIsTracking] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
   const [showTrails, setShowTrails] = useState(true);
+  const wsRef = useRef<WebSocket | null>(null);
 
-  // Update tracker positions
+  // Connect to WebSocket backend
   useEffect(() => {
-    if (!isTracking) return;
+    function connect() {
+      const ws = new WebSocket(`${BACKEND_URL}?type=dashboard`);
+      wsRef.current = ws;
 
-    const interval = setInterval(() => {
-      setTrackers(prev => prev.map(tracker => updateTrackerPosition(tracker)));
-    }, 2000);
+      ws.onopen = () => {
+        setIsConnected(true);
+      };
 
-    return () => clearInterval(interval);
-  }, [isTracking]);
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'devices') {
+          setTrackers(data.data);
+        }
+      };
+
+      ws.onclose = () => {
+        setIsConnected(false);
+        setTimeout(connect, 3000);
+      };
+
+      ws.onerror = () => {
+        ws.close();
+      };
+    }
+
+    connect();
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
+  }, []);
 
   // Keep selected tracker in sync
   useEffect(() => {
@@ -34,16 +62,16 @@ function App() {
     setSelectedTracker(prev => prev?.id === tracker.id ? null : tracker);
   }, []);
 
-  const handleReset = () => {
-    setTrackers(createInitialTrackers());
-    setSelectedTracker(null);
-  };
+  const trackerLink = `${window.location.origin.replace('5173', '3001')}/tracker`;
 
   return (
     <div className="app">
       <header className="header">
-        <h1>🛰️ GPS Fleet Tracker</h1>
+        <h1>📱 Phone Tracker</h1>
         <div className="header-actions">
+          <span className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
+            {isConnected ? '● Connected' : '○ Disconnected'}
+          </span>
           <button 
             className={`btn ${showTrails ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setShowTrails(!showTrails)}
@@ -51,13 +79,10 @@ function App() {
             {showTrails ? '📍 Trails On' : '📍 Trails Off'}
           </button>
           <button 
-            className={`btn ${isTracking ? 'btn-success' : 'btn-danger'}`}
-            onClick={() => setIsTracking(!isTracking)}
+            className="btn btn-secondary"
+            onClick={() => navigator.clipboard.writeText(trackerLink)}
           >
-            {isTracking ? '⏸ Pause' : '▶ Resume'}
-          </button>
-          <button className="btn btn-secondary" onClick={handleReset}>
-            🔄 Reset
+            📋 Copy Tracker Link
           </button>
         </div>
       </header>
