@@ -3,7 +3,8 @@ import { TrackerMap } from './components/TrackerMap';
 import { TrackerSidebar } from './components/TrackerSidebar';
 import { Tracker } from './data/gpsData';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'ws://localhost:3001';
+const BACKEND_WS = import.meta.env.VITE_BACKEND_WS || 'ws://localhost:3001';
+const BACKEND_HTTP = import.meta.env.VITE_BACKEND_HTTP || 'http://localhost:3001';
 
 function App() {
   const [trackers, setTrackers] = useState<Tracker[]>([]);
@@ -15,7 +16,7 @@ function App() {
   // Connect to WebSocket backend
   useEffect(() => {
     function connect() {
-      const ws = new WebSocket(`${BACKEND_URL}?type=dashboard`);
+      const ws = new WebSocket(`${BACKEND_WS}?type=dashboard`);
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -62,7 +63,7 @@ function App() {
     setSelectedTracker(prev => prev?.id === tracker.id ? null : tracker);
   }, []);
 
-  const trackerLink = `${window.location.origin.replace('5173', '3001')}/tracker`;
+  const trackerLink = `${BACKEND_HTTP}/tracker`;
 
   return (
     <div className="app">
