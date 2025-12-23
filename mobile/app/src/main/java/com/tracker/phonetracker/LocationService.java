@@ -31,6 +31,7 @@ public class LocationService extends Service {
     private LocationCallback locationCallback;
     private WebSocketClient webSocket;
     private String deviceId;
+    private String deviceName;
     private boolean isConnected = false;
 
     @Override
@@ -43,6 +44,7 @@ public class LocationService extends Service {
             deviceId = java.util.UUID.randomUUID().toString();
             prefs.edit().putString("device_id", deviceId).apply();
         }
+        deviceName = prefs.getString("device_name", "Device");
         
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         
@@ -101,7 +103,8 @@ public class LocationService extends Service {
 
     private void connectWebSocket() {
         try {
-            URI uri = new URI(SERVER_URL + "?type=tracker&deviceId=" + deviceId);
+            String encodedName = java.net.URLEncoder.encode(deviceName, "UTF-8");
+            URI uri = new URI(SERVER_URL + "?type=tracker&deviceId=" + deviceId + "&name=" + encodedName);
             
             webSocket = new WebSocketClient(uri) {
                 @Override

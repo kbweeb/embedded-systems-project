@@ -9,7 +9,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     
     private TextView statusText;
     private Button actionButton;
+    private EditText nameInput;
     private SharedPreferences prefs;
 
     @Override
@@ -32,7 +35,13 @@ public class MainActivity extends AppCompatActivity {
         
         statusText = findViewById(R.id.statusText);
         actionButton = findViewById(R.id.actionButton);
+        nameInput = findViewById(R.id.nameInput);
         prefs = getSharedPreferences("tracker", MODE_PRIVATE);
+        
+        String savedName = prefs.getString("device_name", "");
+        if (!savedName.isEmpty()) {
+            nameInput.setText(savedName);
+        }
         
         actionButton.setOnClickListener(v -> handleAction());
         
@@ -51,6 +60,13 @@ public class MainActivity extends AppCompatActivity {
         } else if (!hasBackgroundLocationPermission()) {
             requestBackgroundLocationPermission();
         } else if (!isServiceRunning()) {
+            String name = nameInput.getText().toString().trim();
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Please enter a device name", Toast.LENGTH_SHORT).show();
+                nameInput.requestFocus();
+                return;
+            }
+            prefs.edit().putString("device_name", name).apply();
             startTrackingService();
         } else {
             stopTrackingService();
@@ -130,15 +146,20 @@ public class MainActivity extends AppCompatActivity {
         if (!hasLocationPermission()) {
             statusText.setText("Location permission required");
             actionButton.setText("Grant Permission");
+            nameInput.setVisibility(View.GONE);
         } else if (!hasBackgroundLocationPermission()) {
             statusText.setText("Background location required\nSelect 'Allow all the time'");
             actionButton.setText("Grant Background Access");
+            nameInput.setVisibility(View.GONE);
         } else if (isServiceRunning()) {
-            statusText.setText("Tracking Active\nLocation is being shared");
+            String name = prefs.getString("device_name", "Device");
+            statusText.setText("Tracking Active: " + name + "\nLocation is being shared");
             actionButton.setText("Stop Tracking");
+            nameInput.setVisibility(View.GONE);
         } else {
-            statusText.setText("Ready to track\nTap to start");
+            statusText.setText("Enter a name for this device");
             actionButton.setText("Start Tracking");
+            nameInput.setVisibility(View.VISIBLE);
         }
     }
     

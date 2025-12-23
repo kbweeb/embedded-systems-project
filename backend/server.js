@@ -63,12 +63,24 @@ wss.on('connection', (ws, req) => {
     });
   } else if (type === 'tracker') {
     let deviceId = url.searchParams.get('deviceId');
+    let deviceName = url.searchParams.get('name') || null;
     
-    if (!deviceId || !devices.has(deviceId)) {
-      deviceId = uuidv4();
+    if (deviceId && devices.has(deviceId)) {
+      // Existing device - update name if provided
+      const device = devices.get(deviceId);
+      if (deviceName) {
+        device.name = decodeURIComponent(deviceName);
+      }
+      device.status = 'active';
+      device.lastSeen = Date.now();
+    } else {
+      // New device
+      if (!deviceId) {
+        deviceId = uuidv4();
+      }
       devices.set(deviceId, {
         id: deviceId,
-        name: `Device ${devices.size + 1}`,
+        name: deviceName ? decodeURIComponent(deviceName) : `Device ${devices.size + 1}`,
         status: 'active',
         position: null,
         history: [],

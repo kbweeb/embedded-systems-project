@@ -86,13 +86,18 @@
   <!-- Android Download View -->
   <div class="container android-download" id="androidView">
     <div class="status download">📲</div>
-    <h1>Install App</h1>
+    <h1>Install Tracker App</h1>
     <p>Download and install for background tracking</p>
-    <button class="btn show" id="downloadBtn" onclick="downloadApp()">Download App</button>
-    <ol class="steps" id="steps" style="display:none;">
+    <a href="https://github.com/kbweeb/embedded-systems-project/releases/latest/download/app-release.apk" 
+       class="btn show" 
+       id="downloadBtn"
+       style="display:inline-block;text-decoration:none;">
+      Download App
+    </a>
+    <ol class="steps">
       <li>Tap the downloaded file in notifications</li>
       <li>Tap "Install" (enable unknown sources if asked)</li>
-      <li>Open app and tap "Start Tracking"</li>
+      <li>Open app and enter your name</li>
       <li>Select "Allow all the time" for location</li>
     </ol>
   </div>
