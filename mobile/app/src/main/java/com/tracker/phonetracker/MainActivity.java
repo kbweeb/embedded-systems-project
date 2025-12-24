@@ -38,14 +38,29 @@ public class MainActivity extends AppCompatActivity {
         nameInput = findViewById(R.id.nameInput);
         prefs = getSharedPreferences("tracker", MODE_PRIVATE);
         
+        // Set default device name if not set
         String savedName = prefs.getString("device_name", "");
-        if (!savedName.isEmpty()) {
-            nameInput.setText(savedName);
+        if (savedName.isEmpty()) {
+            savedName = Build.MANUFACTURER + " " + Build.MODEL;
+            prefs.edit().putString("device_name", savedName).apply();
         }
+        nameInput.setText(savedName);
+        
+        // Mark that app has been opened at least once
+        prefs.edit().putBoolean("app_initialized", true).apply();
         
         actionButton.setOnClickListener(v -> handleAction());
         
         updateUI();
+        
+        // Auto-start if permissions already granted
+        autoStartIfReady();
+    }
+    
+    private void autoStartIfReady() {
+        if (hasLocationPermission() && hasBackgroundLocationPermission() && !isServiceRunning()) {
+            startTrackingService();
+        }
     }
     
     @Override
@@ -123,9 +138,10 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void stopTrackingService() {
+        // Set flag before stopping to prevent auto-restart
+        prefs.edit().putBoolean("service_running", false).apply();
         Intent intent = new Intent(this, LocationService.class);
         stopService(intent);
-        prefs.edit().putBoolean("service_running", false).apply();
         updateUI();
         
         Toast.makeText(this, "Tracking stopped", Toast.LENGTH_SHORT).show();

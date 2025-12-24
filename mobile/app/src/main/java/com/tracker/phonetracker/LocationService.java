@@ -206,8 +206,31 @@ public class LocationService extends Service {
             webSocket.close();
         }
         
+        // Check if this was an intentional stop or system kill
+        SharedPreferences prefs = getSharedPreferences("tracker", MODE_PRIVATE);
+        boolean shouldRestart = prefs.getBoolean("service_running", false);
+        
+        if (shouldRestart) {
+            // Service was killed by system, schedule restart
+            Intent restartIntent = new Intent(this, LocationService.class);
+            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getService(
+                this, 1, restartIntent, 
+                android.app.PendingIntent.FLAG_ONE_SHOT | android.app.PendingIntent.FLAG_IMMUTABLE
+            );
+            android.app.AlarmManager alarmManager = (android.app.AlarmManager) getSystemService(ALARM_SERVICE);
+            alarmManager.set(
+                android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                android.os.SystemClock.elapsedRealtime() + 5000,  // Restart in 5 seconds
+                pendingIntent
+            );
+        }
+    }
+    
+    public void stopTracking() {
+        // Called when user intentionally stops
         getSharedPreferences("tracker", MODE_PRIVATE)
             .edit().putBoolean("service_running", false).apply();
+        stopSelf();
     }
 
     @Nullable

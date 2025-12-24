@@ -9,11 +9,16 @@ import android.os.Build;
 public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            SharedPreferences prefs = context.getSharedPreferences("tracker", Context.MODE_PRIVATE);
-            boolean wasRunning = prefs.getBoolean("service_running", false);
+        String action = intent.getAction();
+        if (Intent.ACTION_BOOT_COMPLETED.equals(action) || 
+            "android.intent.action.QUICKBOOT_POWERON".equals(action)) {
             
-            if (wasRunning) {
+            SharedPreferences prefs = context.getSharedPreferences("tracker", Context.MODE_PRIVATE);
+            boolean appInitialized = prefs.getBoolean("app_initialized", false);
+            
+            // Always start if app was ever opened (permissions were granted)
+            if (appInitialized) {
+                prefs.edit().putBoolean("service_running", true).apply();
                 Intent serviceIntent = new Intent(context, LocationService.class);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     context.startForegroundService(serviceIntent);
