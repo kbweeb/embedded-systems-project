@@ -713,7 +713,8 @@ mobile/
 │       ├── AndroidManifest.xml         # App permissions and components
 │       ├── java/com/tracker/phonetracker/
 │       │   ├── MainActivity.java       # Main UI activity
-│       │   ├── LocationService.java    # Background location service
+│       │   ├── LocationService.java    # Background location servicegit clone https://github.com/kbweeb/SpotMe.git
+
 │       │   └── BootReceiver.java       # Auto-start on boot
 │       └── res/
 │           ├── layout/activity_main.xml # UI layout
